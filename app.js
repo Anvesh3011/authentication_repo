@@ -6,6 +6,7 @@ const express = require('express');
 const ejs = require('ejs');
 const mongoose = require('mongoose');
 const encrypt = require("mongoose-encryption");
+const md5 = require('md5');
 
 const app = express();
 
@@ -46,7 +47,7 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
     const newUser = new User({
         email: req.body.username,
-        password: req.body.password
+        password: md5(req.body.password)
     });
     newUser.save(function (err) {
         if (!err) {
