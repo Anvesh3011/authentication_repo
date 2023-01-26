@@ -6,7 +6,9 @@ const express = require('express');
 const ejs = require('ejs');
 const mongoose = require('mongoose');
 const encrypt = require("mongoose-encryption");
-const md5 = require('md5');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
 
 const app = express();
 
@@ -45,21 +47,25 @@ app.get('/register', (req, res) => {
     res.render("register");
 });
 app.post('/register', (req, res) => {
-    const newUser = new User({
-        email: req.body.username,
-        password: md5(req.body.password)
+    bcrypt.hash(req.body.password, saltRounds, function (err, hash) {
+        // Store hash in your password DB.
+        const newUser = new User({
+            email: req.body.username,
+            password: hash
+        });
+        newUser.save(function (err) {
+            if (!err) {
+                res.render("secrets");
+            } else {
+                console.log(err);
+            }
+        });
     });
-    newUser.save(function (err) {
-        if (!err) {
-            res.render("secrets");
-        } else {
-            console.log(err);
-        }
-    });
+
 });
 app.post('/login', function (req, res) {
     const username = req.body.username;
-    const password = req.body.password;
+    const password = md5(req.body.password);
     User.findOne({
         email: username
     }, function (err, foundUser) {
