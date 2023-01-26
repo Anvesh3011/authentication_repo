@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(express.static("public"));
-mongoose.connect("mongodb://localhost:27017/userDB", {
+mongoose.connect("mongodb://127.0.0.1:27017/userDB", {
     useNewUrlParser: true
 });
 //TODO
@@ -65,7 +65,7 @@ app.post('/register', (req, res) => {
 });
 app.post('/login', function (req, res) {
     const username = req.body.username;
-    const password = md5(req.body.password);
+    const password = (req.body.password);
     User.findOne({
         email: username
     }, function (err, foundUser) {
@@ -73,9 +73,15 @@ app.post('/login', function (req, res) {
             console.log(err);
         } else {
             if (foundUser) {
-                if (foundUser.password === password) {
-                    res.render("secrets");
-                }
+                bcrypt.compare(password, foundUser.password, function (err, result) {
+                    // result == true
+                    if (result === true) {
+                        res.render("secrets");
+
+                    }
+                });
+
+
             }
         }
     });
